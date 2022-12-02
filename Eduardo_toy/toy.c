@@ -42,32 +42,32 @@ void switch_interrupt_handler() {
 
 // axis zero for col, axis 1 for row
 
-short drawPos[2] = {1,10}, controlPos[2] = {2, 10};
-short colVelocity = 1, colLimits[2] = {1, screenWidth/2};
+short drawPos[2] = {0,0}, controlPos[2] = {0, 0};
+short colVelocity = 3, colLimits[2] = {1, screenWidth/2};
 
-void draw_ball(unsigned short color) {
-  for (int i = 0; i < screenWidth; i+= 2) {
-    for (int j = 0; j < screenHeight; j+= 2) {
-        fillRectangle(i, j, 3, 3, color);
+void draw_stars(int col, int row, unsigned short color) {
+  for (int i = 0; i < screenWidth; i+= 10) {
+    for (int j = 0; j < screenHeight-30; j+= 10) {
+        fillRectangle(col+i, row+j, 3, 3, color);
     }
   }  
 }
 
 
-void screen_update_ball() {
+void screen_update_stars() {
   for (char axis = 0; axis < 2; axis ++) 
     if (drawPos[axis] != controlPos[axis]) /* position changed? */
       goto redraw;
   return;			/* nothing to do */
  redraw:
-  draw_ball(COLOR_BLUE); /* erase */
+  draw_stars(drawPos[0], drawPos[1], COLOR_BLACK); /* erase */
   for (char axis = 0; axis < 2; axis ++) 
     drawPos[axis] = controlPos[axis];
-  draw_ball(COLOR_WHITE); /* draw */
+  draw_stars(drawPos[0], drawPos[1], COLOR_WHITE); /* draw */
 }
 
 void draw_grass() {
-    fillRectangle(0, screenHeight-30, screenWidth, screenHeight, COLOR_FOREST_GREEN);
+    fillRectangle(0, 125, screenWidth, 130, COLOR_FOREST_GREEN);
 }
 void draw_tree() {
     fillRectangle(10, screenHeight-40, 12, screenHeight-30, COLOR_CHOCOLATE);
@@ -82,7 +82,7 @@ void wdt_c_handler() {
   static int secCount = 0;
 
   secCount ++;
-  if (secCount >= 25) {		/* 10/sec */
+  if (secCount >= 10) {		
    
     {				/* move ball */
       short oldCol = controlPos[0];
@@ -111,7 +111,7 @@ void main() {
   enableWDTInterrupts();      /**< enable periodic interrupt */
   or_sr(0x8);	              /**< GIE (enable interrupts) */
   
-  clearScreen(COLOR_NAVY);
+  clearScreen(COLOR_BLACK);
   while (1) {			/* forever */
     if (redrawScreen) {
       redrawScreen = 0;
@@ -125,9 +125,8 @@ void main() {
     
 void
 update_shape() {
-  screen_update_ball();
+  screen_update_stars();
   draw_grass();
-  draw_tree();
 }
    
 
